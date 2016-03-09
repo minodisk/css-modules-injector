@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha --require intelli-espower-loader",
+    "testw": "./node_modules/mocha/bin/mocha --require intelli-espower-loader --watch"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,14 @@
     "memory-fs": "^0.3.0",
     "webpack": "^1.12.14",
     "yargs": "^4.2.0"
+  },
+  "devDependencies": {
+    "intelli-espower-loader": "^1.0.1",
+    "jsdom": "^8.1.0",
+    "mocha": "^2.4.5",
+    "power-assert": "^1.2.0"
+  },
+  "directories": {
+    "test": "test/"
   }
 }
