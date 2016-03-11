@@ -22,9 +22,9 @@ const trimBreakline = (str) => str.replace(/\n$/, '')
 
 const cleanUp = () => {
   return glob(path.join(__dirname, 'fixtures/**/*.html'))
-    .then((paths) => {
+    .then((g) => {
       return Promise.all(
-        paths.map((path) => fs.unlink(path))
+        g.paths.map((path) => fs.unlink(path))
       )
     })
 }
