@@ -23,6 +23,7 @@
     "ejs-loader": "^0.2.1",
     "glob": "^7.0.3",
     "glob-base": "^0.3.0",
+    "globby": "^4.0.0",
     "jade": "^1.11.0",
     "jade-loader": "^0.8.0",
     "memory-fs": "^0.3.0",

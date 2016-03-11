@@ -2,9 +2,9 @@
 
 const cli = require('../lib/cli')
 const argv = cli.parse(process.argv)
-const inject = require('../lib/inject').injectWithOptions
+const injectWithOptions = require('../lib/inject').injectWithOptions
 
-inject(argv)
+injectWithOptions(process.cwd(), argv)
   .catch((err) => {
     console.error(err.toString())
   })
