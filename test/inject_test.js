@@ -20,7 +20,7 @@ describe('inject', () => {
   })
 
   afterEach(() => {
-    // return utils.cleanUp()
+    return utils.cleanUp()
   })
 
   describe('injectWithBlobs', () => {
@@ -36,10 +36,10 @@ describe('inject', () => {
         })
     })
 
-  // it('should clean up temporary files', () => {
-  //   return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
-  //     .then(() => glob(path.join(__dirname, 'fixtures/src/**/.*.js')))
-  //     .then((paths) => assert(paths.length === 0))
-  // })
+    it('should clean up temporary files', () => {
+      return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
+        .then(() => glob(path.join(utils.fixtures, 'src/**/.*.?(js|js~)')))
+        .then((paths) => assert(paths.length === 0))
+    })
   })
 })
