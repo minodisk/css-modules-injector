@@ -31,7 +31,7 @@
     "memory-fs": "^0.3.0",
     "mkdirp": "^0.5.1",
     "pretty": "^1.0.0",
-    "style-loader": "^0.13.0",
+    "style-loader": "git://github.com/minodisk/style-loader.git#inline-sourcemap",
     "webpack": "^1.12.14",
     "yargs": "^4.2.0"
   },
