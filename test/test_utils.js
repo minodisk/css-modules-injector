@@ -1,11 +1,15 @@
-const glob = require('../lib/promise/glob')
+const fs = require('../lib/promise/fs')
 const path = require('path')
 
+exports.fixturesPath = path.join(__dirname, '../test-fixtures')
+
 exports.cleanUp = () => {
-  return glob(path.join(__dirname, 'fixtures/dist/**/*.html'))
-    .then((g) => {
-      return Promise.all(
-        g.paths.map((path) => fs.unlink(path))
-      )
+  const dist = path.join(__dirname, '../test-fixtures/dist')
+  return fs.stat()
+    .then(() => {
+      return fs.unlink(dist)
+    })
+    .catch((err) => {
+      // do nothing
     })
 }

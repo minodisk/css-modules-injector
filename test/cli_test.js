@@ -12,15 +12,6 @@ describe('cli', () => {
     })
   })
 
-  describe('css', () => {
-    it('should be specified with --css', () => {
-      assert(cli.parse(['--css', 'foo/bar.css']).css === 'foo/bar.css')
-    })
-    it('should be specified with --c', () => {
-      assert(cli.parse(['-c', 'foo/bar.css']).css === 'foo/bar.css')
-    })
-  })
-
   describe('output', () => {
     it('should be specified with --output', () => {
       assert(cli.parse(['--output', 'dist']).output === 'dist')

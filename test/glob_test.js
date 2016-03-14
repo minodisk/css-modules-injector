@@ -1,12 +1,7 @@
 const glob = require('../lib/promise/glob')
 const assert = require('power-assert')
 const path = require('path')
-
-const cwd = process.cwd()
-
-const absFromCwd = (p) => path.join(cwd, p)
-const absFromThis = (p) => path.join(__dirname, p)
-const relFromCwd = (p) => path.relative(cwd, absFromThis(p))
+const utils = require('./test_utils')
 
 const isEqualArray = (a, b) => {
   b = b.slice()
@@ -22,14 +17,13 @@ const isEqualArray = (a, b) => {
 describe('promise', () => {
   describe('glob', () => {
     it('should parse base and find paths', () => {
-      return glob(relFromCwd('fixtures/src/css/**/*.css'))
-        .then((g) => {
-          assert(absFromCwd(g.base) === absFromThis('fixtures/src/css'))
-          const actual = g.paths.map((p) => absFromCwd(p))
+      return glob(path.join(utils.fixturesPath, 'src/html/**/*.html'))
+        .then((paths) => {
+          const actual = paths.map((p) => path.relative(utils.fixturesPath, p))
           const expected = [
-            'fixtures/src/css/baz.css',
-            'fixtures/src/css/zag/qux.css',
-          ].map((p) => absFromThis(p))
+            'src/html/foo.html',
+            'src/html/zig/bar.html',
+          ]
           assert(isEqualArray(actual, expected))
         })
     })

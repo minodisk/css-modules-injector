@@ -1,17 +1,45 @@
 const injectWithBlobs = require('../lib/inject').injectWithBlobs
 const fs = require('../lib/promise/fs')
+const glob = require('../lib/promise/glob')
 const path = require('path')
-const fixturesDir = path.join(__dirname, 'fixtures')
+const utils = require('./test_utils')
+const assert = require('power-assert')
 
-const fooHTML = ``
-const barHTML = ``
+const expected = {}
 
 describe('inject', () => {
+  before(() => {
+    return Promise.all([
+      'expected/foo.html',
+      'expected/bar.html',
+    ].map((p) => {
+      const name = path.basename(p, path.extname(p))
+      return fs.readFile(path.join(utils.fixturesPath, p))
+        .then((content) => expected[name] = content)
+    }))
+  })
+
+  afterEach(() => {
+    // return utils.cleanUp()
+  })
+
   describe('injectWithBlobs', () => {
-    it('', () => {
-      return injectWithBlobs(fixtureDir, 'src/html/**/*.html', 'src/css/**/*.css', 'dist')
-        .then(() => fs.readFile(path.join(__dirname, 'fixtures/dist/foo.html'), fsOptions))
-        .then((content) => assert(content === fooHTML))
+    it('should generate files', () => {
+      return injectWithBlobs(utils.fixturesPath, 'src/html/**/*.html', 'dist')
+        .then(() => Promise.all([
+          fs.readFile(path.join(utils.fixturesPath, 'dist/foo.html')),
+          fs.readFile(path.join(utils.fixturesPath, 'dist/zig/bar.html')),
+        ]))
+        .then((contents) => {
+          assert(contents[0] === expected.foo)
+          assert(contents[1] === expected.bar)
+        })
     })
+
+  // it('should clean up temporary files', () => {
+  //   return injectWithBlobs(utils.fixturesPath, 'src/html/**/*.html', 'dist')
+  //     .then(() => glob(path.join(__dirname, 'fixtures/src/**/.*.js')))
+  //     .then((paths) => assert(paths.length === 0))
+  // })
   })
 })
