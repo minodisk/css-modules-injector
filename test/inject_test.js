@@ -14,7 +14,7 @@ describe('inject', () => {
       'expected/bar.html',
     ].map((p) => {
       const name = path.basename(p, path.extname(p))
-      return fs.readFile(path.join(utils.fixturesPath, p))
+      return fs.readFile(path.join(utils.fixtures, p))
         .then((content) => expected[name] = content)
     }))
   })
@@ -25,10 +25,10 @@ describe('inject', () => {
 
   describe('injectWithBlobs', () => {
     it('should generate files', () => {
-      return injectWithBlobs(utils.fixturesPath, 'src/html/**/*.html', 'dist')
+      return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
         .then(() => Promise.all([
-          fs.readFile(path.join(utils.fixturesPath, 'dist/foo.html')),
-          fs.readFile(path.join(utils.fixturesPath, 'dist/zig/bar.html')),
+          fs.readFile(path.join(utils.fixtures, 'dist/foo.html')),
+          fs.readFile(path.join(utils.fixtures, 'dist/zig/bar.html')),
         ]))
         .then((contents) => {
           assert(contents[0] === expected.foo)
@@ -37,7 +37,7 @@ describe('inject', () => {
     })
 
   // it('should clean up temporary files', () => {
-  //   return injectWithBlobs(utils.fixturesPath, 'src/html/**/*.html', 'dist')
+  //   return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
   //     .then(() => glob(path.join(__dirname, 'fixtures/src/**/.*.js')))
   //     .then((paths) => assert(paths.length === 0))
   // })

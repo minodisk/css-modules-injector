@@ -17,9 +17,9 @@ const isEqualArray = (a, b) => {
 describe('promise', () => {
   describe('glob', () => {
     it('should parse base and find paths', () => {
-      return glob(path.join(utils.fixturesPath, 'src/html/**/*.html'))
+      return glob(path.join(utils.fixtures, 'src/html/**/*.html'))
         .then((paths) => {
-          const actual = paths.map((p) => path.relative(utils.fixturesPath, p))
+          const actual = paths.map((p) => path.relative(utils.fixtures, p))
           const expected = [
             'src/html/foo.html',
             'src/html/zig/bar.html',

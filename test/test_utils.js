@@ -1,15 +1,19 @@
 const fs = require('../lib/promise/fs')
 const path = require('path')
 
-exports.fixturesPath = path.join(__dirname, '../test-fixtures')
+const fixtures = path.join(__dirname, 'fixtures')
 
-exports.cleanUp = () => {
-  const dist = path.join(__dirname, '../test-fixtures/dist')
+const cleanUp = () => {
   return fs.stat()
     .then(() => {
-      return fs.unlink(dist)
+      return fs.unlink(path.join(fixtures, 'dist'))
     })
     .catch((err) => {
       // do nothing
     })
+}
+
+module.exports = {
+  fixtures,
+  cleanUp,
 }
