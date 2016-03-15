@@ -33,6 +33,6 @@ node_modules
 .node_repl_history
 
 # Test
-fixtures/**/*.js
-fixtures/**/*.js~
-fixtures/dist
+test/fixtures/src/**/*.js
+test/fixtures/src/**/*.js~
+text/fixtures/dist
