@@ -1,4 +1,4 @@
-const injectWithBlobs = require('../lib/inject').injectWithBlobs
+const inject = require('../lib/inject').inject
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
 const path = require('path')
@@ -23,9 +23,11 @@ describe('inject', () => {
     return utils.cleanUp()
   })
 
-  describe('injectWithBlobs', () => {
+  describe('inject', () => {
     it('should generate files', () => {
-      return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
+      const writer = new Buffer(1000)
+      return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
+        .then(() => console.log(writer.toString('utf8')))
         .then(() => Promise.all([
           fs.readFile(path.join(utils.fixtures, 'dist/foo.html')),
           fs.readFile(path.join(utils.fixtures, 'dist/zig/bar.html')),
@@ -37,7 +39,9 @@ describe('inject', () => {
     })
 
     it('should clean up temporary files', () => {
-      return injectWithBlobs(utils.fixtures, 'src/html/**/*.html', 'dist')
+      const writer = new Buffer(1000)
+      return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
+        .then(() => console.log(writer.toString('utf8')))
         .then(() => glob(path.join(utils.fixtures, 'src/**/.*.?(js|js~)')))
         .then((paths) => assert(paths.length === 0))
     })

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
-const cli = require('../lib/cli')
-const argv = cli.parse(process.argv)
-const injectWithOptions = require('../lib/inject').injectWithOptions
+const injectWithArgv = require('../lib/inject').injectWithArgv
+const colors = require('colors/safe')
 
-injectWithOptions(process.cwd(), argv)
+injectWithArgv(process.cwd(), process.argv, process.stdout)
   .catch((err) => {
-    console.error(err.toString())
+    process.stderr.write(colors.red(err.toString()) + '\n')
   })
