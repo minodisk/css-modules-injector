@@ -27,7 +27,9 @@ describe('inject', () => {
     it('should generate files', () => {
       const writer = new Buffer(1000)
       return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
-        .then(() => console.log(writer.toString('utf8')))
+        .then(() => {
+          assert(writer.toString().indexOf('Hash') === 0)
+        })
         .then(() => Promise.all([
           fs.readFile(path.join(utils.fixtures, 'dist/foo.html')),
           fs.readFile(path.join(utils.fixtures, 'dist/zig/bar.html')),
@@ -41,7 +43,9 @@ describe('inject', () => {
     it('should clean up temporary files', () => {
       const writer = new Buffer(1000)
       return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
-        .then(() => console.log(writer.toString('utf8')))
+        .then(() => {
+          assert(writer.toString().indexOf('Hash') === 0)
+        })
         .then(() => glob(path.join(utils.fixtures, 'src/**/.*.?(js|js~)')))
         .then((paths) => assert(paths.length === 0))
     })
