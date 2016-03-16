@@ -1,8 +1,9 @@
 {
-  "name": "css-modules-injector",
+  "name": "csspack",
   "version": "0.0.1",
-  "description": "",
+  "description": "A bundler for CSS and friends.",
   "main": "index.js",
+  "bin": "bin/csspack.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --require intelli-espower-loader",
     "testw": "./node_modules/mocha/bin/mocha --require intelli-espower-loader --watch"
@@ -20,6 +21,7 @@
   "dependencies": {
     "colors": "^1.1.2",
     "css-loader": "^0.23.1",
+    "deep-assign": "^2.0.0",
     "del": "^2.2.0",
     "ejs": "^2.4.1",
     "ejs-loader": "^0.2.1",
@@ -34,7 +36,7 @@
     "pretty": "^1.0.0",
     "style-loader": "git://github.com/minodisk/style-loader.git#inline-sourcemap",
     "webpack": "^1.12.14",
-    "yargs": "^4.2.0"
+    "yargs": "^4.3.1"
   },
   "devDependencies": {
     "intelli-espower-loader": "^1.0.1",

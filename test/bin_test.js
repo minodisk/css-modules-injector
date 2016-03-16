@@ -2,15 +2,15 @@ const assert = require('power-assert')
 const path = require('path')
 const execFile = require('child_process').execFile
 const pkg = require('../package.json')
-const bin = path.join(__dirname, '../bin/cmi.js')
 const fs = require('../lib/promise/fs')
 const utils = require('./test_utils')
+const bin = path.join(__dirname, '../bin/csspack.js')
 
 const pexecFile = (file, args, options) => {
   return new Promise((resolve, reject) => {
     execFile(file, args, options, (err, stdout, stderr) => {
       if (err) return reject(err)
-      resolve(stdout, stderr)
+      resolve({stdout, stderr})
     })
   })
 }
@@ -25,10 +25,10 @@ describe('bin', () => {
   describe('--help', () => {
     it('should contain usage and options', () => {
       return pexecFile(bin, ['--help'])
-        .then((stdout, stderr) => {
-          assert(stdout.indexOf('Usage:') !== -1)
-          assert(stdout.indexOf('Options:') !== -1)
-          assert(stderr === undefined)
+        .then((result) => {
+          assert(result.stdout.indexOf('Usage:') !== -1)
+          assert(result.stdout.indexOf('Options:') !== -1)
+          assert(result.stderr === '')
         })
     })
   })
@@ -36,16 +36,10 @@ describe('bin', () => {
   describe('--version', () => {
     it('should be equal to the version in package.json', () => {
       return pexecFile(bin, ['--version'])
-        .then((stdout, stderr) => {
-          assert(trimBreakline(stdout) === pkg.version)
-          assert(stderr === undefined)
+        .then((result) => {
+          assert(trimBreakline(result.stdout) === pkg.version)
+          assert(result.stderr === '')
         })
     })
-  })
-
-  describe('no args', () => {
-  })
-
-  describe('--input, --css, --output', () => {
   })
 })

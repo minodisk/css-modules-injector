@@ -1,4 +1,4 @@
-const inject = require('../lib/inject').inject
+const csspack = require('../lib/csspack').csspack
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
 const path = require('path')
@@ -7,7 +7,7 @@ const assert = require('power-assert')
 
 const expected = {}
 
-describe('inject', () => {
+describe('csspack', () => {
   before(() => {
     return Promise.all([
       'expected/foo.html',
@@ -23,10 +23,14 @@ describe('inject', () => {
     return utils.cleanUp()
   })
 
-  describe('inject', () => {
+  describe('csspack', () => {
     it('should generate files', () => {
       const writer = new Buffer(1000)
-      return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
+      return csspack({
+        context: utils.fixtures,
+        entry: 'src/html/**/*.html',
+        output: 'dist',
+      }, writer)
         .then(() => {
           assert(writer.toString().indexOf('Hash') === 0)
         })
@@ -42,7 +46,11 @@ describe('inject', () => {
 
     it('should clean up temporary files', () => {
       const writer = new Buffer(1000)
-      return inject(utils.fixtures, 'src/html/**/*.html', 'dist', writer)
+      return csspack({
+        context: utils.fixtures,
+        entry: 'src/html/**/*.html',
+        output: 'dist',
+      }, writer)
         .then(() => {
           assert(writer.toString().indexOf('Hash') === 0)
         })
