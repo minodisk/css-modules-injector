@@ -21,7 +21,6 @@ describe('cli', () => {
     describe('with no args and a config', () => {
       it('should be overwitten with config', () => {
         const context = path.join(__dirname, 'fixtures')
-        console.log('input context:', context)
         const options = parse(['--context', context])
         assert(options.context === context)
         assert(options.entry === '**/*.html')
