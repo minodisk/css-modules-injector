@@ -1,6 +1,6 @@
 'use strict'
 
-const CSSPack = require('../lib/csspack')
+const csspack = require('../lib/csspack')
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
 const path = require('path')
@@ -9,7 +9,7 @@ const assert = require('power-assert')
 
 const expected = {}
 
-describe('CSSPack', () => {
+describe('csspack', () => {
   before(() => {
     return Promise.all([
       'expected/foo.html',
@@ -27,12 +27,12 @@ describe('CSSPack', () => {
 
   it('should generate files', () => {
     const writer = new Buffer(1000)
-    return new CSSPack({
+    return csspack({
       context: utils.fixtures,
       entry: 'src/html/**/*.html',
       output: 'dist',
-    }, writer)
-      .run()
+      outWriter: writer,
+    })
       .then(() => {
         assert(writer.toString().indexOf('Hash') === 0)
       })
@@ -48,12 +48,12 @@ describe('CSSPack', () => {
 
   it('should clean up temporary files', () => {
     const writer = new Buffer(1000)
-    return new CSSPack({
+    return csspack({
       context: utils.fixtures,
       entry: 'src/html/**/*.html',
       output: 'dist',
-    }, writer)
-      .run()
+      outWriter: writer,
+    })
       .then(() => {
         assert(writer.toString().indexOf('Hash') === 0)
       })
@@ -70,51 +70,53 @@ describe('CSSPack', () => {
 
     it('should regenerate when added/changed and remove when removed', () => {
       const writer = new Buffer(1000)
-      const csspack = new CSSPack({
+      csspack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
-      }, writer)
-
-      return csspack.run()
-        .then(() => {
-          return new Promise((resolve, reject) => {
-            csspack
-              .on('generate', () => {
-                fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
-                  .then((content) => {
-                    assert(content === expected.foo)
-                    resolve()
+        outWriter: writer,
+      })
+        .then((c) => {
+          return Promise.resolve()
+            .then(() => {
+              return new Promise((resolve, reject) => {
+                c
+                  .on('generate', () => {
+                    fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
+                      .then((content) => {
+                        assert(content === expected.foo)
+                        resolve()
+                      })
                   })
+                fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
+                  .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
               })
-            fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
-              .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
-          })
-        })
-        .then(() => {
-          return new Promise((resolve, reject) => {
-            csspack
-              .on('update', () => {
-                fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
-                  .then((content) => {
-                    assert(content === expected.foo)
-                    resolve()
+            })
+            .then(() => {
+              return new Promise((resolve, reject) => {
+                c
+                  .on('update', () => {
+                    fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
+                      .then((content) => {
+                        assert(content === expected.foo)
+                        resolve()
+                      })
                   })
+                fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
+                  .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
               })
-            fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
-              .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
-          })
-        })
-        .then(() => {
-          return new Promise((resolve, reject) => {
-            csspack
-              .on('delete', () => {
-                fs.stat(path.join(utils.fixtures, 'dist/testing.html'))
-                  .then(() => reject('should be error'))
-                  .catch((err) => resolve())
+            })
+            .then(() => {
+              return new Promise((resolve, reject) => {
+                c
+                  .on('delete', () => {
+                    fs.stat(path.join(utils.fixtures, 'dist/testing.html'))
+                      .then(() => reject('should be error'))
+                      .catch((err) => resolve())
+                  })
+                del(path.join(utils.fixtures, 'src/testing.html'))
               })
-            del(path.join(utils.fixtures, 'src/testing.html'))
-          })
+            })
         })
     })
   })
