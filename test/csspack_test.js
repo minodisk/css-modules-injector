@@ -1,3 +1,5 @@
+'use strict'
+
 const CSSPack = require('../lib/csspack')
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
@@ -23,45 +25,96 @@ describe('CSSPack', () => {
     return utils.cleanUp()
   })
 
-  describe('constructor', () => {
-    it('should generate files', () => {
-      const writer = new Buffer(1000)
-      return new CSSPack({
-        context: utils.fixtures,
-        entry: 'src/html/**/*.html',
-        output: 'dist',
-      }, writer)
-        .run()
-        .then(() => {
-          assert(writer.toString().indexOf('Hash') === 0)
-        })
-        .then(() => Promise.all([
-          fs.readFile(path.join(utils.fixtures, 'dist/foo.html')),
-          fs.readFile(path.join(utils.fixtures, 'dist/zig/bar.html')),
-        ]))
-        .then((contents) => {
-          assert(contents[0] === expected.foo)
-          assert(contents[1] === expected.bar)
-        })
-    })
+  it('should generate files', () => {
+    const writer = new Buffer(1000)
+    return new CSSPack({
+      context: utils.fixtures,
+      entry: 'src/html/**/*.html',
+      output: 'dist',
+    }, writer)
+      .run()
+      .then(() => {
+        assert(writer.toString().indexOf('Hash') === 0)
+      })
+      .then(() => Promise.all([
+        fs.readFile(path.join(utils.fixtures, 'dist/foo.html')),
+        fs.readFile(path.join(utils.fixtures, 'dist/zig/bar.html')),
+      ]))
+      .then((contents) => {
+        assert(contents[0] === expected.foo)
+        assert(contents[1] === expected.bar)
+      })
+  })
 
-    it('should clean up temporary files', () => {
+  it('should clean up temporary files', () => {
+    const writer = new Buffer(1000)
+    return new CSSPack({
+      context: utils.fixtures,
+      entry: 'src/html/**/*.html',
+      output: 'dist',
+    }, writer)
+      .run()
+      .then(() => {
+        assert(writer.toString().indexOf('Hash') === 0)
+      })
+      .catch((err) => {
+        console.log('catch err')
+      })
+      .then(() => glob(path.join(utils.fixtures, 'src/**/.*.?(js|js~)')))
+      .then((paths) => {
+        assert(paths.length === 0)
+      })
+  })
+
+  describe('watch', () => {
+
+    it('should regenerate when added/changed and remove when removed', () => {
       const writer = new Buffer(1000)
-      return new CSSPack({
+      const csspack = new CSSPack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
       }, writer)
-        .run()
+
+      return csspack.run()
         .then(() => {
-          assert(writer.toString().indexOf('Hash') === 0)
+          return new Promise((resolve, reject) => {
+            csspack
+              .on('generate', () => {
+                fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
+                  .then((content) => {
+                    assert(content === expected.foo)
+                    resolve()
+                  })
+              })
+            fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
+              .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
+          })
         })
-        .catch((err) => {
-          console.log('catch err')
+        .then(() => {
+          return new Promise((resolve, reject) => {
+            csspack
+              .on('update', () => {
+                fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
+                  .then((content) => {
+                    assert(content === expected.foo)
+                    resolve()
+                  })
+              })
+            fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
+              .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
+          })
         })
-        .then(() => glob(path.join(utils.fixtures, 'src/**/.*.?(js|js~)')))
-        .then((paths) => {
-          assert(paths.length === 0)
+        .then(() => {
+          return new Promise((resolve, reject) => {
+            csspack
+              .on('delete', () => {
+                fs.stat(path.join(utils.fixtures, 'dist/testing.html'))
+                  .then(() => reject('should be error'))
+                  .catch((err) => resolve())
+              })
+            del(path.join(utils.fixtures, 'src/testing.html'))
+          })
         })
     })
   })
