@@ -1,4 +1,4 @@
-const csspack = require('../lib/csspack').csspack
+const CSSPack = require('../lib/csspack')
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
 const path = require('path')
@@ -7,7 +7,7 @@ const assert = require('power-assert')
 
 const expected = {}
 
-describe('csspack', () => {
+describe('CSSPack', () => {
   before(() => {
     return Promise.all([
       'expected/foo.html',
@@ -23,14 +23,15 @@ describe('csspack', () => {
     return utils.cleanUp()
   })
 
-  describe('csspack', () => {
+  describe('constructor', () => {
     it('should generate files', () => {
       const writer = new Buffer(1000)
-      return csspack({
+      return new CSSPack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
       }, writer)
+        .run()
         .then(() => {
           assert(writer.toString().indexOf('Hash') === 0)
         })
@@ -46,11 +47,12 @@ describe('csspack', () => {
 
     it('should clean up temporary files', () => {
       const writer = new Buffer(1000)
-      return csspack({
+      return new CSSPack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
       }, writer)
+        .run()
         .then(() => {
           assert(writer.toString().indexOf('Hash') === 0)
         })

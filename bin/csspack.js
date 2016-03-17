@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const csspack = require('../lib/csspack').csspack
+const CSSPack = require('../lib/CSSPack')
 const parse = require('../lib/cli').parse
 
-csspack(parse(process.argv.slice(2)), process.stdout, process.stderr)
+new CSSPack(parse(process.argv.slice(2)), process.stdout, process.stderr)
+  .run()
