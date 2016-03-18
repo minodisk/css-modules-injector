@@ -30,6 +30,7 @@
     "glob": "^7.0.3",
     "glob-base": "^0.3.0",
     "jsdom": "^8.1.0",
+    "memory-fs": "^0.3.0",
     "mkdirp": "^0.5.1",
     "pretty": "^1.0.0",
     "style-loader": "git://github.com/minodisk/style-loader.git#inline-sourcemap",

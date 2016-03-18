@@ -21,8 +21,9 @@ describe('promise', () => {
         .then((paths) => {
           const actual = paths.map((p) => path.relative(utils.fixtures, p))
           const expected = [
-            'src/html/foo.html',
             'src/html/zig/bar.html',
+            'src/html/foo.html',
+            'src/html/modified.html',
           ]
           assert(isEqualArray(actual, expected))
         })

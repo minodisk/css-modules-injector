@@ -1,11 +1,14 @@
 'use strict'
 
+const path = require('path')
+
+const assert = require('power-assert')
+const cheerio = require('cheerio')
+
 const csspack = require('../lib/csspack')
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
-const path = require('path')
 const utils = require('./test_utils')
-const assert = require('power-assert')
 
 const expected = {}
 
@@ -14,6 +17,7 @@ describe('csspack', () => {
     return Promise.all([
       'expected/foo.html',
       'expected/bar.html',
+      'expected/modified.html',
     ].map((p) => {
       const name = path.basename(p, path.extname(p))
       return fs.readFile(path.join(utils.fixtures, p))
@@ -68,7 +72,7 @@ describe('csspack', () => {
 
   describe('with watch option', () => {
 
-    it('should generate a bundled html when a new html is added', () => {
+    it('should generate a bundled html file when a new html file is added', () => {
       return csspack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
@@ -77,27 +81,67 @@ describe('csspack', () => {
         watch: true,
       })
         .then((c) => {
-          return Promise.resolve()
-            .then(() => {
-              return new Promise((resolve, reject) => {
-                c
-                  .on('generate', (e) => {
-                    if (e.rel !== 'watch_test.html') return
-                    fs.readFile(path.join(utils.fixtures, 'dist/watch_test.html'))
-                      .then((content) => {
-                        assert(content === expected.foo)
-                        resolve()
-                      })
+          return new Promise((resolve, reject) => {
+            c
+              .on('add', (e) => {
+                if (e.rel !== 'watch_add_test.html') return
+                fs.readFile(path.join(utils.fixtures, 'dist/watch_add_test.html'))
+                  .then((content) => {
+                    assert(content === expected.foo)
+                    c.destruct()
+                    resolve()
                   })
-                fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
-                  .then(content => fs.writeFile(path.join(utils.fixtures, 'src/html/watch_test.html'), content))
-                  .catch(err => reject(err))
               })
-            })
+            fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
+              .then(content => fs.writeFile(path.join(utils.fixtures, 'src/html/watch_add_test.html'), content))
+              .catch(err => reject(err))
+          })
         })
     })
 
-    it('should regenerate a bundled html when a source html is modified', () => {
+    it('should regenerate a bundled html file when a source html file is modified', () => {
+      let compiler
+      csspack({
+        context: utils.fixtures,
+        entry: 'src/html/**/*.html',
+        output: 'dist',
+        outWriter: new Buffer(1000),
+        watch: true,
+      })
+        .then((c) => {
+          compiler = c
+          return new Promise((resolve, reject) => {
+            compiler
+              .on('change', (e) => {
+                fs.readFile(path.join(utils.fixtures, 'dist/modified.html'))
+                  .then((content) => {
+                    assert(content === expected.modified)
+                    resolve()
+                  })
+                  .catch(err => reject(err))
+              })
+              .run()
+              .catch(err => reject(err))
+            fs.readFile(path.join(utils.fixtures, 'src/html/modified.html'))
+              .then((content) => {
+                const $ = cheerio.load(content)
+                $('h1').text('modified')
+                return fs.writeFile(path.join(utils.fixtures, 'src/html/modified.html'), $.html())
+              })
+              .catch(err => reject(err))
+          })
+        })
+        .catch(err => err)
+        .then((err) => {
+          compiler.destruct()
+          if (err) return Promise.reject(err)
+        })
+    })
+
+    it('should regenerate bundled html files when a css file is modified', () => {
+    })
+
+    it('should remove a bundled html file when a source html file is removed', () => {
     })
   })
 })
