@@ -66,58 +66,38 @@ describe('csspack', () => {
       })
   })
 
-  describe('watch', () => {
+  describe('with watch option', () => {
 
-    it('should regenerate when added/changed and remove when removed', () => {
-      const writer = new Buffer(1000)
-      csspack({
+    it('should generate a bundled html when a new html is added', () => {
+      return csspack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
-        outWriter: writer,
+        outWriter: new Buffer(1000),
+        watch: true,
       })
         .then((c) => {
           return Promise.resolve()
             .then(() => {
               return new Promise((resolve, reject) => {
                 c
-                  .on('generate', () => {
-                    fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
+                  .on('generate', (e) => {
+                    if (e.rel !== 'watch_test.html') return
+                    fs.readFile(path.join(utils.fixtures, 'dist/watch_test.html'))
                       .then((content) => {
                         assert(content === expected.foo)
                         resolve()
                       })
                   })
-                fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
-                  .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
-              })
-            })
-            .then(() => {
-              return new Promise((resolve, reject) => {
-                c
-                  .on('update', () => {
-                    fs.readFile(path.join(utils.fixtures, 'dist/testing.html'))
-                      .then((content) => {
-                        assert(content === expected.foo)
-                        resolve()
-                      })
-                  })
-                fs.readFile(path.join(utils.fixtures, 'src/foo.html'))
-                  .then((content) => writeFile(path.join(utils.fixtures, 'src/testing.html'), content))
-              })
-            })
-            .then(() => {
-              return new Promise((resolve, reject) => {
-                c
-                  .on('delete', () => {
-                    fs.stat(path.join(utils.fixtures, 'dist/testing.html'))
-                      .then(() => reject('should be error'))
-                      .catch((err) => resolve())
-                  })
-                del(path.join(utils.fixtures, 'src/testing.html'))
+                fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
+                  .then(content => fs.writeFile(path.join(utils.fixtures, 'src/html/watch_test.html'), content))
+                  .catch(err => reject(err))
               })
             })
         })
+    })
+
+    it('should regenerate a bundled html when a source html is modified', () => {
     })
   })
 })

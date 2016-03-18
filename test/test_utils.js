@@ -4,7 +4,12 @@ const del = require('del')
 
 const fixtures = path.join(__dirname, 'fixtures')
 
-const cleanUp = () => del(path.join(fixtures, 'dist'))
+const cleanUp = () => {
+  return del([
+    path.join(fixtures, 'dist'),
+    path.join(fixtures, 'src/**/*_test.*'),
+  ])
+}
 
 module.exports = {
   fixtures,
