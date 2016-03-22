@@ -126,6 +126,8 @@ describe('csspack', () => {
               })
               .catch(err => reject(err))
           })
+        compiler
+          .on('error', reject)
         compiler.run()
           .then(() => fs.readFile(path.join(utils.fixtures, 'src/html/foo.html')))
           .then((content) => {
@@ -133,7 +135,7 @@ describe('csspack', () => {
             $('h1').text('mod')
             return fs.writeFile(path.join(utils.fixtures, 'src/html/watch_modify_test.html'), $.html())
           })
-          .catch(err => reject(err))
+          .catch(reject)
       })
         .catch(err => error = err)
         .then(() => {
