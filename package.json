@@ -6,7 +6,7 @@
   "bin": "bin/csspack.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --require intelli-espower-loader",
-    "testw": "./node_modules/mocha/bin/mocha --require intelli-espower-loader --watch"
+    "testw": "./node_modules/mocha/bin/mocha --require intelli-espower-loader --watch --watch-extensions js,css"
   },
   "repository": {
     "type": "git",

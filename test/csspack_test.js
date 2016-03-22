@@ -17,7 +17,6 @@ describe('csspack', () => {
     return Promise.all([
       'expected/foo.html',
       'expected/bar.html',
-      'expected/modified.html',
     ].map((p) => {
       const name = path.basename(p, path.extname(p))
       return fs.readFile(path.join(utils.fixtures, p))
@@ -73,6 +72,8 @@ describe('csspack', () => {
   describe('with watch option', () => {
 
     it('should generate a bundled html file when a new html file is added', () => {
+      let compiler
+      let error
       return csspack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
@@ -81,14 +82,14 @@ describe('csspack', () => {
         watch: true,
       })
         .then((c) => {
+          compiler = c
           return new Promise((resolve, reject) => {
-            c
+            compiler
               .on('add', (e) => {
                 if (e.rel !== 'watch_add_test.html') return
                 fs.readFile(path.join(utils.fixtures, 'dist/watch_add_test.html'))
                   .then((content) => {
                     assert(content === expected.foo)
-                    c.destruct()
                     resolve()
                   })
               })
@@ -97,11 +98,17 @@ describe('csspack', () => {
               .catch(err => reject(err))
           })
         })
+        .catch(err => error = err)
+        .then(() => {
+          compiler.destruct()
+          if (error) return Promise.reject(error)
+        })
     })
 
     it('should regenerate a bundled html file when a source html file is modified', () => {
       let compiler
-      csspack({
+      let error
+      return csspack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
@@ -113,28 +120,26 @@ describe('csspack', () => {
           return new Promise((resolve, reject) => {
             compiler
               .on('change', (e) => {
-                fs.readFile(path.join(utils.fixtures, 'dist/modified.html'))
+                fs.readFile(path.join(utils.fixtures, 'dist/watch_modify_test.html'))
                   .then((content) => {
-                    assert(content === expected.modified)
+                    assert(content === expected.foo.replace('<h1>foo</h1>', '<h1>mod</h1>'))
                     resolve()
                   })
                   .catch(err => reject(err))
               })
-              .run()
-              .catch(err => reject(err))
-            fs.readFile(path.join(utils.fixtures, 'src/html/modified.html'))
+            fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
               .then((content) => {
                 const $ = cheerio.load(content)
-                $('h1').text('modified')
-                return fs.writeFile(path.join(utils.fixtures, 'src/html/modified.html'), $.html())
+                $('h1').text('mod')
+                return fs.writeFile(path.join(utils.fixtures, 'src/html/watch_modify_test.html'), $.html())
               })
               .catch(err => reject(err))
           })
         })
-        .catch(err => err)
-        .then((err) => {
+        .catch(err => error = err)
+        .then(() => {
           compiler.destruct()
-          if (err) return Promise.reject(err)
+          if (error) return Promise.reject(error)
         })
     })
 
