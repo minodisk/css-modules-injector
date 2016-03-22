@@ -6,6 +6,7 @@ const assert = require('power-assert')
 const cheerio = require('cheerio')
 
 const csspack = require('../lib/csspack')
+const CSSPack = csspack.CSSPack
 const fs = require('../lib/promise/fs')
 const glob = require('../lib/promise/glob')
 const utils = require('./test_utils')
@@ -108,34 +109,32 @@ describe('csspack', () => {
     it('should regenerate a bundled html file when a source html file is modified', () => {
       let compiler
       let error
-      return csspack({
+      compiler = new CSSPack({
         context: utils.fixtures,
         entry: 'src/html/**/*.html',
         output: 'dist',
         outWriter: new Buffer(1000),
         watch: true,
       })
-        .then((c) => {
-          compiler = c
-          return new Promise((resolve, reject) => {
-            compiler
-              .on('change', (e) => {
-                fs.readFile(path.join(utils.fixtures, 'dist/watch_modify_test.html'))
-                  .then((content) => {
-                    assert(content === expected.foo.replace('<h1>foo</h1>', '<h1>mod</h1>'))
-                    resolve()
-                  })
-                  .catch(err => reject(err))
-              })
-            fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
+      return new Promise((resolve, reject) => {
+        compiler
+          .on('change', (e) => {
+            fs.readFile(path.join(utils.fixtures, 'dist/watch_modify_test.html'))
               .then((content) => {
-                const $ = cheerio.load(content)
-                $('h1').text('mod')
-                return fs.writeFile(path.join(utils.fixtures, 'src/html/watch_modify_test.html'), $.html())
+                assert(content === expected.foo.replace('<h1>foo</h1>', '<h1>mod</h1>'))
+                resolve()
               })
               .catch(err => reject(err))
           })
-        })
+        compiler.run()
+          .then(() => fs.readFile(path.join(utils.fixtures, 'src/html/foo.html')))
+          .then((content) => {
+            const $ = cheerio.load(content)
+            $('h1').text('mod')
+            return fs.writeFile(path.join(utils.fixtures, 'src/html/watch_modify_test.html'), $.html())
+          })
+          .catch(err => reject(err))
+      })
         .catch(err => error = err)
         .then(() => {
           compiler.destruct()
