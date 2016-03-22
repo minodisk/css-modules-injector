@@ -2,8 +2,9 @@ machine:
   node:
     version: 4.4.0
 
-deploy:
+deployment:
   publish:
-    script:
+    branch: publish
+    commands:
       - echo $NPMRC | base64 --decode > ~/.npmrc
       - npm publish .
