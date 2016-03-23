@@ -106,42 +106,54 @@ describe('csspack', () => {
         })
     })
 
-    it('should regenerate a bundled html file when a source html file is modified', () => {
-      let compiler
-      let error
-      compiler = new CSSPack({
-        context: utils.fixtures,
-        entry: 'src/html/**/*.html',
-        output: 'dist',
-        outWriter: new Buffer(1000),
-        watch: true,
-      })
-      return new Promise((resolve, reject) => {
-        compiler
-          .on('change', (e) => {
-            fs.readFile(path.join(utils.fixtures, 'dist/watch_modify_test.html'))
-              .then((content) => {
-                assert(content === expected.foo.replace('<h1>foo</h1>', '<h1>mod</h1>'))
-                resolve()
-              })
-              .catch(err => reject(err))
-          })
-        compiler
-          .on('error', reject)
-        compiler.run()
-          .then(() => fs.readFile(path.join(utils.fixtures, 'src/html/foo.html')))
+    describe('change', () => {
+      let beforeContent
+      const srcPath = path.join(utils.fixtures, 'src/html/watch_modify_test.html')
+
+      beforeEach(() => {
+        return fs.readFile(path.join(utils.fixtures, 'src/html/foo.html'))
           .then((content) => {
-            const $ = cheerio.load(content)
-            $('h1').text('mod')
-            return fs.writeFile(path.join(utils.fixtures, 'src/html/watch_modify_test.html'), $.html())
+            beforeContent = content
+            return fs.writeFile(srcPath, beforeContent)
           })
-          .catch(reject)
       })
-        .catch(err => error = err)
-        .then(() => {
-          compiler.destruct()
-          if (error) return Promise.reject(error)
+
+      it('should regenerate a bundled html file when a source html file is modified', () => {
+        let compiler
+        let error
+        compiler = new CSSPack({
+          context: utils.fixtures,
+          entry: 'src/html/**/*.html',
+          output: 'dist',
+          outWriter: new Buffer(1000),
+          watch: true,
         })
+        return new Promise((resolve, reject) => {
+          compiler
+            .on('change', (e) => {
+              fs.readFile(path.join(utils.fixtures, 'dist/watch_modify_test.html'))
+                .then((content) => {
+                  assert(content === expected.foo.replace('<h1>foo</h1>', '<h1>mod</h1>'))
+                  resolve()
+                })
+                .catch(reject)
+            })
+          compiler
+            .on('error', reject)
+          compiler.run()
+            .then(() => {
+              const $ = cheerio.load(beforeContent)
+              $('h1').text('mod')
+              return fs.writeFile(srcPath, $.html())
+            })
+            .catch(reject)
+        })
+          .catch(err => error = err)
+          .then(() => {
+            compiler.destruct()
+            if (error) return Promise.reject(error)
+          })
+      })
     })
 
     it('should regenerate bundled html files when a css file is modified', () => {
