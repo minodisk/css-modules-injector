@@ -22,6 +22,7 @@
     "cheerio": "^0.20.0",
     "chokidar": "^1.4.3",
     "colors": "^1.1.2",
+    "css": "^2.2.1",
     "css-loader": "^0.23.1",
     "deep-assign": "^2.0.0",
     "del": "^2.2.0",
